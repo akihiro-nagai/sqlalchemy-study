@@ -1,5 +1,6 @@
 [tools]
 python = "3.14.4"
+uv = "latest"
 
 [tasks.console]
 run = ".venv/bin/python console.py"
