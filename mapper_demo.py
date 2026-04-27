@@ -12,82 +12,13 @@ Declarative (Active Record 的) との違い:
 
 from datetime import datetime
 
-from sqlalchemy import (
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    create_engine,
-    select,
-)
-from sqlalchemy.orm import Session, registry, relationship
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 from blog.dto import BlogWithTags, TagData
-
-# =========================================================
-# 1. テーブル定義 (スキーマ層 — ドメインから独立)
-# =========================================================
-metadata = MetaData()
-
-users_table = Table(
-    "users",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(100), nullable=False),
-    Column("email", String(255), unique=True, nullable=False),
-    Column("created_at", DateTime, nullable=False),
-)
-
-posts_table = Table(
-    "posts",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("user_id", Integer, ForeignKey("users.id"), nullable=False),
-    Column("title", String(255), nullable=False),
-    Column("body", Text, nullable=False),
-    Column("published_at", DateTime, nullable=True),
-    Column("created_at", DateTime, nullable=False),
-)
-
-tags_table = Table(
-    "tags",
-    metadata,
-    Column("id", Integer, primary_key=True, autoincrement=True),
-    Column("name", String(50), unique=True, nullable=False),
-)
-
-post_tags_table = Table(
-    "post_tags",
-    metadata,
-    Column("post_id", Integer, ForeignKey("posts.id"), primary_key=True),
-    Column("tag_id", Integer, ForeignKey("tags.id"), primary_key=True),
-)
-
-# =========================================================
-# 2. マッピング (ドメインオブジェクト ↔ テーブルの橋渡し)
-# =========================================================
-mapper_registry = registry()
+from blog.mapping import posts_table, post_tags_table, tags_table, setup_mappers
 
 
-def setup_mappers() -> None:
-    """ドメインクラスをテーブルに紐付ける (一度だけ呼ぶ)"""
-    mapper_registry.map_imperatively(TagData, tags_table)
-    mapper_registry.map_imperatively(
-        BlogWithTags,
-        posts_table,
-        properties={
-            "tags": relationship(TagData, secondary=post_tags_table),
-        },
-    )
-
-
-# =========================================================
-# 3. デモ
-# =========================================================
 def main() -> None:
     engine = create_engine(
         "mysql+pymysql://blog:blog@127.0.0.1:3306/blog",
