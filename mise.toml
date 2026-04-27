@@ -1,0 +1,18 @@
+[tools]
+python = "3.14.4"
+
+[tasks.console]
+run = ".venv/bin/python console.py"
+description = "対話型コンソールを起動"
+
+[tasks.seeds]
+run = ".venv/bin/python seeds.py"
+description = "サンプルデータを投入"
+
+[tasks.up]
+run = "docker compose up -d"
+description = "MySQL を起動"
+
+[tasks.down]
+run = "docker compose down"
+description = "MySQL を停止"
